@@ -1,0 +1,36 @@
+{% extends "nav.html" %}
+
+{% block title %}
+Signup
+{% endblock title %}
+
+
+{% block form %}
+
+<form action="{% url 'signup' %}" method="POST">
+    {% csrf_token %}
+    <h2>Sign Up</h2>
+    {% for message in messages %}
+    <div class="alert alert-{{message.tags}}" role="alert">
+        {{message}}
+      </div>
+    {% endfor %}
+    
+    <div class="mb-3 ">
+      <input type="email" class="form-control" name ='email' placeholder="Email Address">
+    </div>
+    <div class="mb-3">
+      <input type="password" class="form-control" name ='pass1' placeholder="Password">
+    </div>
+    <div class="mb-3">
+        <input type="password" class="form-control" name ='pass2' placeholder=" Confirm Password">
+    </div>
+    <button type="submit" class="btn btn-primary">Signup</button>
+    <br>
+    Already User <a href="/prsauth/login/">Login</a>
+
+  </form>
+
+{% endblock form %}
+
+

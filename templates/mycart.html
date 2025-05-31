@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Cart</title>
+  <link rel="stylesheet" href="styles.css"> <!-- Link to your CSS file -->
+</head>
+<body>
+  <header>
+    <h1>My Cart</h1>
+  </header>
+  <main>
+    {% if cart %}
+      <table>
+        <thead>
+          <tr>
+            <th>Item</th>
+            <th>Quantity</th>
+            <th>Price</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in cart %}
+          <tr>
+            <td>{{ item.name }}</td>
+            <td>
+              <input type="number" min="1" value="{{ item.quantity }}" class="quantity-input" data-item-id="{{ item.id }}">
+            </td>
+            <td>{{ item.price }}</td>
+            <td>
+              <button class="remove-item" data-item-id="{{ item.id }}">Remove</button>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <div class="cart-summary">
+        <p>Total Items: {{ cart|length }}</p>
+        <p>Total Price: ₹{{ total_price }}</p>
+      </div>
+      <button id="checkout-button">Proceed to Checkout</button>
+    {% else %}
+      <p>Your cart is empty!</p>
+    {% endif %}
+  </main>
+  <script>
+    // JavaScript for handling quantity updates and item removal
+    document.addEventListener('DOMContentLoaded', () => {
+      // Handle quantity update
+      document.querySelectorAll('.quantity-input').forEach(input => {
+        input.addEventListener('change', (e) => {
+          const itemId = e.target.dataset.itemId;
+          const newQuantity = e.target.value;
+          
+          fetch('/update-cart/', { 
+            method: 'POST',
+            body: JSON.stringify({ itemId, quantity: newQuantity }),
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': '{{ csrf_token }}'
+            }
+          })
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              location.reload(); // Reload page to reflect changes
+            }
+          });
+        });
+      });
+
+      // Handle item removal
+      document.querySelectorAll('.remove-item').forEach(button => {
+        button.addEventListener('click', (e) => {
+          const itemId = e.target.dataset.itemId;
+
+          fetch('/remove-from-cart/', {
+            method: 'POST',
+            body: JSON.stringify({ itemId }),
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': '{{ csrf_token }}'
+            }
+          })
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              location.reload(); // Reload page to reflect changes
+            }
+          });
+        });
+      });
+    });
+  </script>
+</body>
+</html>
